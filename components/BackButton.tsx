@@ -1,23 +1,29 @@
-import { Feather } from '@expo/vector-icons';
-import { Text, View, StyleSheet } from 'react-native';
+import { Icon } from '@roninoss/icons';
+import { router } from 'expo-router';
+import { Pressable } from 'react-native';
+import { Text } from '~/components/nativewindui/Text';
+import { cn } from '~/lib/cn';
 
-export const BackButton = ({ onPress }: { onPress: () => void }) => {
+interface BackButtonProps {
+  onPress?: () => void;
+  className?: string;
+}
+
+export const BackButton = ({ onPress, className }: BackButtonProps) => {
+  const handlePress = () => {
+    if (onPress) {
+      onPress();
+    } else {
+      router.back();
+    }
+  };
+
   return (
-    <View style={styles.backButton}>
-      <Feather name="chevron-left" size={16} color="#007AFF" />
-      <Text style={styles.backButtonText} onPress={onPress}>
-        Back
-      </Text>
-    </View>
+    <Pressable
+      onPress={handlePress}
+      className={cn('ios:active:opacity-70 flex-row items-center', className)}>
+      <Icon namingScheme="sfSymbol" name="chevron.left" size={20} className="mr-1 text-primary" />
+      <Text className="font-medium text-primary">Back</Text>
+    </Pressable>
   );
 };
-const styles = StyleSheet.create({
-  backButton: {
-    flexDirection: 'row',
-    paddingLeft: 20,
-  },
-  backButtonText: {
-    color: '#007AFF',
-    marginLeft: 4,
-  },
-});

@@ -11,13 +11,21 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Tab One',
+          title: 'Components',
           tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
           headerRight: () => (
             <Link href="/modal" asChild>
               <HeaderButton />
             </Link>
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="cocktails"
+        options={{
+          title: 'Cocktails',
+          tabBarIcon: ({ color }) => <TabBarIcon name="glass" color={color} />,
+          headerShown: false,
         }}
       />
       <Tabs.Screen

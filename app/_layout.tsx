@@ -1,20 +1,17 @@
 import '../global.css';
 import 'expo-dev-client';
 import { ThemeProvider as NavThemeProvider } from '@react-navigation/native';
-import { Icon } from '@roninoss/icons';
 
 import { ActionSheetProvider } from '@expo/react-native-action-sheet';
 
 import { BottomSheetModalProvider } from '@gorhom/bottom-sheet';
 
-import { Link, Stack } from 'expo-router';
+import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { Pressable, View } from 'react-native';
 
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { ThemeToggle } from '~/components/ThemeToggle';
-import { cn } from '~/lib/cn';
 import { useColorScheme, useInitialAndroidBarSync } from '~/lib/useColorScheme';
 import { NAV_THEME } from '~/theme';
 
@@ -43,6 +40,13 @@ export default function RootLayout() {
               <Stack screenOptions={SCREEN_OPTIONS}>
                 <Stack.Screen name="(tabs)" options={TABS_OPTIONS} />
                 <Stack.Screen name="modal" options={MODAL_OPTIONS} />
+                <Stack.Screen
+                  name="cocktail/[id]"
+                  options={{
+                    headerShown: false,
+                    presentation: 'card',
+                  }}
+                />
               </Stack>
             </NavThemeProvider>
           </ActionSheetProvider>

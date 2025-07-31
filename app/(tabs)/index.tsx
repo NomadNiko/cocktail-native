@@ -220,15 +220,18 @@ const COMPONENTS: ComponentItem[] = [
     name: 'Progress Indicator',
     component: function ProgressIndicatorExample() {
       const [progress, setProgress] = React.useState(13);
-      let id: ReturnType<typeof setInterval> | null = null;
+      const idRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
       React.useEffect(() => {
-        if (!id) {
-          id = setInterval(() => {
+        if (!idRef.current) {
+          idRef.current = setInterval(() => {
             setProgress((prev) => (prev >= 99 ? 0 : prev + 5));
           }, 1000);
         }
         return () => {
-          if (id) clearInterval(id);
+          if (idRef.current) {
+            clearInterval(idRef.current);
+            idRef.current = null;
+          }
         };
       }, []);
       return (

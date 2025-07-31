@@ -2,7 +2,7 @@
   "expo": {
     "name": "cocktail-native",
     "slug": "cocktail-native",
-    "version": "1.0.0",
+    "version": "1.0.2",
     "scheme": "cocktail-native",
     "web": {
       "bundler": "metro",
@@ -33,12 +33,23 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.devnomad.cocktailnative",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
+      },
+      "package": "com.devnomad.cocktailnative"
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "84c9e11f-39da-48fb-8d3c-217137702cca"
       }
     }
   }
