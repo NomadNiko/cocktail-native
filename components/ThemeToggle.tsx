@@ -1,4 +1,4 @@
-import { Icon } from '@roninoss/icons';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Pressable, View } from 'react-native';
 import Animated, { LayoutAnimationConfig, ZoomInRotate } from 'react-native-reanimated';
 
@@ -18,12 +18,12 @@ export function ThemeToggle() {
           {colorScheme === 'dark'
             ? ({ pressed }) => (
                 <View className={cn('px-0.5', pressed && 'opacity-50')}>
-                  <Icon namingScheme="sfSymbol" name="moon.stars" color={COLORS.white} />
+                  <FontAwesome name="moon-o" color={COLORS.white} size={24} />
                 </View>
               )
             : ({ pressed }) => (
                 <View className={cn('px-0.5', pressed && 'opacity-50')}>
-                  <Icon namingScheme="sfSymbol" name="sun.min" color={COLORS.black} />
+                  <FontAwesome name="sun-o" color={COLORS.black} size={24} />
                 </View>
               )}
         </Pressable>

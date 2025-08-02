@@ -58,7 +58,7 @@
       --secondary: 100 211 254;
       --secondary-foreground: 255 255 255;
       --muted: 70 70 73;
-      --muted-foreground: 142 142 147;
+      --muted-foreground: 255 255 255;
       --accent: 255 52 95;
       --accent-foreground: 255 255 255;
       --destructive: 254 67 54;
@@ -78,7 +78,7 @@
       --android-secondary: 28 60 114;
       --android-secondary-foreground: 189 209 255;
       --android-muted: 216 226 255;
-      --android-muted-foreground: 139 144 160;
+      --android-muted-foreground: 255 255 255;
       --android-accent: 83 0 111;
       --android-accent-foreground: 238 177 255;
       --android-destructive: 147 0 10;

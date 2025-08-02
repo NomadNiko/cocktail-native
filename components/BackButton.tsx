@@ -1,4 +1,4 @@
-import { Icon } from '@roninoss/icons';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { router } from 'expo-router';
 import { Pressable } from 'react-native';
 import { Text } from '~/components/nativewindui/Text';
@@ -22,7 +22,7 @@ export const BackButton = ({ onPress, className }: BackButtonProps) => {
     <Pressable
       onPress={handlePress}
       className={cn('ios:active:opacity-70 flex-row items-center', className)}>
-      <Icon namingScheme="sfSymbol" name="chevron.left" size={20} className="mr-1 text-primary" />
+      <FontAwesome name="chevron-left" size={20} color="#0066CC" style={{ marginRight: 4 }} />
       <Text className="font-medium text-primary">Back</Text>
     </Pressable>
   );

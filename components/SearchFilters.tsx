@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { View, ScrollView, Pressable } from 'react-native';
-import { Icon } from '@roninoss/icons';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Text } from '~/components/nativewindui/Text';
 import { Button } from '~/components/nativewindui/Button';
+// Removed Toggle import - no longer used
 import { SearchFilters as SearchFiltersType } from '~/lib/types/cocktail';
 import { cn } from '~/lib/cn';
 
@@ -39,11 +40,11 @@ function FilterSection({ title, value, options, onSelect }: FilterSectionProps) 
         <Text className={cn('flex-1', value ? 'text-foreground' : 'text-muted-foreground')}>
           {displayValue}
         </Text>
-        <Icon
-          namingScheme="sfSymbol"
-          name={isExpanded ? 'chevron.up' : 'chevron.down'}
+        <FontAwesome
+          name={isExpanded ? 'chevron-up' : 'chevron-down'}
           size={16}
-          className="ml-2 text-muted-foreground"
+          color="#9CA3AF"
+          style={{ marginLeft: 8 }}
         />
       </Pressable>
 
@@ -69,14 +70,7 @@ function FilterSection({ title, value, options, onSelect }: FilterSectionProps) 
                   )}>
                   {option.label}
                 </Text>
-                {option.value === value && (
-                  <Icon
-                    namingScheme="sfSymbol"
-                    name="checkmark"
-                    size={16}
-                    className="text-primary"
-                  />
-                )}
+                {option.value === value && <FontAwesome name="check" size={16} color="#0066CC" />}
               </Pressable>
             ))}
           </ScrollView>
@@ -116,7 +110,9 @@ export function SearchFilters({
     ...glassTypes.map((glass) => ({ label: glass, value: glass })),
   ];
 
-  const hasActiveFilters = Object.values(filters).some((v) => v !== undefined && v !== '');
+  const hasActiveFilters = Object.entries(filters).some(([key, value]) => {
+    return value !== undefined && value !== '';
+  });
 
   return (
     <View className="border-t border-border bg-card">
@@ -124,11 +120,9 @@ export function SearchFilters({
       <View className="flex-row items-center justify-between border-b border-border p-4">
         <Text className="text-lg font-semibold text-foreground">Filters</Text>
         <View className="flex-row items-center gap-2">
-          {hasActiveFilters && (
-            <Button variant="secondary" size="sm" onPress={clearFilters}>
-              <Text>Clear All</Text>
-            </Button>
-          )}
+          <Button variant="secondary" size="sm" onPress={clearFilters}>
+            <Text>Reset to Defaults</Text>
+          </Button>
           <Button variant="primary" size="sm" onPress={onClose}>
             <Text>Done</Text>
           </Button>

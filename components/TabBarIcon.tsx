@@ -1,5 +1,5 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import { Icon } from '@roninoss/icons';
+// Removed @roninoss/icons import - using only FontAwesome now
 import { StyleSheet } from 'react-native';
 
 export const TabBarIcon = (props: {
@@ -8,27 +8,7 @@ export const TabBarIcon = (props: {
   useNative?: boolean;
   fallbackName?: React.ComponentProps<typeof FontAwesome>['name'];
 }) => {
-  if (props.useNative) {
-    return (
-      <Icon
-        namingScheme="sfSymbol"
-        name={props.name as string}
-        color={props.color}
-        size={28}
-        style={styles.tabBarIcon}
-        fallback={
-          props.fallbackName ? (
-            <FontAwesome
-              size={28}
-              style={styles.tabBarIcon}
-              name={props.fallbackName}
-              color={props.color}
-            />
-          ) : undefined
-        }
-      />
-    );
-  }
+  // Always use FontAwesome now - removed native/SF Symbol support
 
   return (
     <FontAwesome

@@ -1,10 +1,10 @@
 {
-  "name": "cocktail-native",
+  "name": "bar-vibez",
   "version": "1.0.2",
   "main": "expo-router/entry",
   "scripts": {
     "start": "expo start --dev-client",
-    "tunnel": "expo start --dev-client --tunnel",
+    "tunnel": "expo start --tunnel",
     "ios": "expo run:ios",
     "android": "expo run:android",
     "build:dev": "eas build --profile development",

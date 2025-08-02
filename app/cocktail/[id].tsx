@@ -3,13 +3,56 @@ import { View, ScrollView, Dimensions } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
-import { Icon } from '@roninoss/icons';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Text } from '~/components/nativewindui/Text';
 import { Button } from '~/components/nativewindui/Button';
 import { Container } from '~/components/Container';
 import { BackButton } from '~/components/BackButton';
 import { useCocktails } from '~/lib/hooks/useCocktails';
 import { Cocktail } from '~/lib/types/cocktail';
+import { getCocktailImage } from '~/lib/utils/localImages';
+
+// Static glass image imports using require() with JPG files
+const glassImages = {
+  'Balloon Glass': require('~/assets/glass/balloonGlass.jpg'),
+  'Beer Glass': require('~/assets/glass/beerGlass.jpg'),
+  'Beer Mug': require('~/assets/glass/beerMug.jpg'),
+  'Beer Pilsner': require('~/assets/glass/beerPilsner.jpg'),
+  'Brandy Snifter': require('~/assets/glass/brandySnifter.jpg'),
+  'Champagne Flute': require('~/assets/glass/champagneFlute.jpg'),
+  'Cocktail Glass': require('~/assets/glass/cocktailGlass.jpg'),
+  'Coffee Mug': require('~/assets/glass/coffeeMug.jpg'),
+  'Collins Glass': require('~/assets/glass/collinsGlass.jpg'),
+  'Copper Mug': require('~/assets/glass/copperMug.jpg'),
+  'Cordial Glass': require('~/assets/glass/cordialGlass.jpg'),
+  'Coupe Glass': require('~/assets/glass/coupGlass.jpg'),
+  'Highball Glass': require('~/assets/glass/highballGlass.jpg'),
+  'Hurricane Glass': require('~/assets/glass/hurricanGlass.jpg'),
+  'Irish Coffee Cup': require('~/assets/glass/irishCoffeeCup.jpg'),
+  Jar: require('~/assets/glass/jar.jpg'),
+  'Margarita Glass': require('~/assets/glass/margaritaGlass.jpg'),
+  'Margarita/Coupette Glass': require('~/assets/glass/MargaritaCoupetteGlass.jpg'),
+  'Martini Glass': require('~/assets/glass/martiniGlass.jpg'),
+  'Mason Jar': require('~/assets/glass/masonJar.jpg'),
+  'Nick And Nora Glass': require('~/assets/glass/nickAndNoraGlass.jpg'),
+  'Old-Fashioned Glass': require('~/assets/glass/oldFashionedGlass.jpg'),
+  'Parfait Glass': require('~/assets/glass/parfaitGlass.jpg'),
+  'Pint Glass': require('~/assets/glass/pintGlass.jpg'),
+  Pitcher: require('~/assets/glass/pitcher.jpg'),
+  'Pousse Cafe Glass': require('~/assets/glass/pousseCafeGlass.jpg'),
+  'Punch Bowl': require('~/assets/glass/punchBowl.jpg'),
+  'Shot Glass': require('~/assets/glass/shotGlass.jpg'),
+  'Whiskey Glass': require('~/assets/glass/whiskeyGlass.jpg'),
+  'Whiskey Sour Glass': require('~/assets/glass/whiskeySourGlass.jpg'),
+  'White Wine Glass': require('~/assets/glass/whiteWineGlass.jpg'),
+  'Wine Glass': require('~/assets/glass/wineGlass.jpg'),
+} as const;
+
+const defaultGlassImage = require('~/assets/glass/cocktailGlass.jpg');
+
+function getGlassImage(glassType: string) {
+  return glassImages[glassType as keyof typeof glassImages] || defaultGlassImage;
+}
 
 const { width } = Dimensions.get('window');
 
@@ -35,11 +78,11 @@ export default function CocktailDetailScreen() {
           </View>
 
           <View className="flex-1 items-center justify-center">
-            <Icon
-              namingScheme="sfSymbol"
-              name="exclamationmark.circle"
+            <FontAwesome
+              name="exclamation-circle"
               size={48}
-              className="mb-4 text-muted-foreground"
+              color="#9CA3AF"
+              style={{ marginBottom: 16 }}
             />
             <Text className="mb-2 text-lg font-medium text-foreground">Cocktail not found</Text>
             <Text className="mb-4 text-center text-muted-foreground">
@@ -65,15 +108,19 @@ export default function CocktailDetailScreen() {
         </View>
 
         {/* Image */}
-        {cocktail.image && (
-          <View className="mb-6">
-            <Image
-              source={{ uri: cocktail.image }}
-              style={{ width, height: width * 0.6 }}
-              contentFit="cover"
-            />
-          </View>
-        )}
+        <View className="mb-6 items-center">
+          <Image
+            source={
+              cocktail.image && getCocktailImage(cocktail.image)
+                ? getCocktailImage(cocktail.image)
+                : getGlassImage(cocktail.glass)
+            }
+            style={{ width: 200, height: 200, borderRadius: 12 }}
+            contentFit="contain"
+            placeholder={getGlassImage(cocktail.glass)}
+            transition={200}
+          />
+        </View>
 
         <Container>
           {/* Title and Info */}
@@ -133,14 +180,14 @@ export default function CocktailDetailScreen() {
           <View className="mb-6">
             <Text className="mb-3 text-xl font-semibold text-foreground">Glassware</Text>
             <View className="rounded-lg border border-border bg-card p-4">
-              <View className="flex-row items-center">
-                <Icon
-                  namingScheme="sfSymbol"
-                  name="wineglass"
-                  size={24}
-                  className="mr-3 text-primary"
+              <View className="items-center">
+                <Image
+                  source={getGlassImage(cocktail.glass)}
+                  style={{ width: 80, height: 80 }}
+                  className="mb-6"
+                  contentFit="contain"
                 />
-                <Text className="font-medium text-foreground">{cocktail.glass}</Text>
+                <Text className="text-2xl font-bold text-foreground text-center">{cocktail.glass}</Text>
               </View>
             </View>
           </View>
@@ -156,36 +203,6 @@ export default function CocktailDetailScreen() {
                   </View>
                 ))}
               </View>
-            </View>
-          )}
-
-          {/* Video Link */}
-          {cocktail.video && (
-            <View className="mb-6">
-              <Button
-                variant="secondary"
-                onPress={() => {
-                  // Handle video opening - could integrate with expo-web-browser
-                  console.log('Open video:', cocktail.video);
-                }}
-                className="flex-row items-center">
-                <Icon namingScheme="sfSymbol" name="play.fill" size={16} className="mr-2" />
-                <Text>Watch Video Tutorial</Text>
-              </Button>
-            </View>
-          )}
-
-          {/* Attribution */}
-          {(cocktail.imageSource || cocktail.imageAttribution) && (
-            <View className="bg-muted/30 mb-6 rounded-lg border border-border p-3">
-              <Text className="text-xs text-muted-foreground">
-                {cocktail.imageSource && <>Source: {cocktail.imageSource}</>}
-                {cocktail.imageAttribution && (
-                  <>
-                    {cocktail.imageSource ? ' • ' : ''}Attribution: {cocktail.imageAttribution}
-                  </>
-                )}
-              </Text>
             </View>
           )}
 

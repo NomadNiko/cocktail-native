@@ -1,6 +1,60 @@
 import { MMKV } from 'react-native-mmkv';
 import { Cocktail, CocktailDatabase, SearchFilters } from '../types/cocktail';
 
+// Static glass types and categories for immediate availability
+const GLASS_TYPES = [
+  'Balloon Glass',
+  'Beer Glass',
+  'Beer Mug',
+  'Beer Pilsner',
+  'Brandy Snifter',
+  'Champagne Flute',
+  'Cocktail Glass',
+  'Coffee Mug',
+  'Collins Glass',
+  'Copper Mug',
+  'Cordial Glass',
+  'Coupe Glass',
+  'Highball Glass',
+  'Hurricane Glass',
+  'Irish Coffee Cup',
+  'Jar',
+  'Margarita Glass',
+  'Margarita/Coupette Glass',
+  'Martini Glass',
+  'Mason Jar',
+  'Nick And Nora Glass',
+  'Old-Fashioned Glass',
+  'Parfait Glass',
+  'Pint Glass',
+  'Pitcher',
+  'Pousse Cafe Glass',
+  'Punch Bowl',
+  'Shot Glass',
+  'Whiskey Glass',
+  'Whiskey Sour Glass',
+  'White Wine Glass',
+  'Wine Glass',
+];
+
+const CATEGORIES = [
+  'Beer',
+  'Brandy',
+  'Classic Cocktails',
+  'Cocktail',
+  'Cocoa',
+  'Coffee / Tea',
+  'Homemade Liqueur',
+  'Non-alcoholic Drinks',
+  'Ordinary Drink',
+  'Other / Unknown',
+  'Punch / Party Drink',
+  'Shake',
+  'Shooters',
+  'Shot',
+  'Soft Drink',
+];
+
 class CocktailDB {
   private storage: MMKV;
   private cocktails: Map<string, Cocktail> = new Map();
@@ -68,13 +122,11 @@ class CocktailDB {
     const normalizedQuery = query.toLowerCase().trim();
 
     return this.getAllCocktails().filter((cocktail) => {
-      // Text search
+      // Text search - only search names, not ingredients
       const matchesQuery =
         !query ||
         cocktail.name.toLowerCase().includes(normalizedQuery) ||
-        cocktail.alternateName?.toLowerCase().includes(normalizedQuery) ||
-        cocktail.ingredients.some((ing) => ing.name.toLowerCase().includes(normalizedQuery)) ||
-        cocktail.instructions.en.toLowerCase().includes(normalizedQuery);
+        cocktail.alternateName?.toLowerCase().includes(normalizedQuery);
 
       if (!matchesQuery) return false;
 
@@ -82,14 +134,20 @@ class CocktailDB {
       if (filters?.alcoholic && cocktail.alcoholic !== filters.alcoholic) return false;
       if (filters?.category && cocktail.category !== filters.category) return false;
       if (filters?.glass && cocktail.glass !== filters.glass) return false;
+      if (filters?.hasImage !== undefined) {
+        const hasImage = cocktail.image !== null && cocktail.image !== '';
+        if (filters.hasImage !== hasImage) return false;
+      }
 
       if (filters?.ingredients && filters.ingredients.length > 0) {
-        const hasIngredients = filters.ingredients.every((filterIng) =>
-          cocktail.ingredients.some((ing) =>
-            ing.name.toLowerCase().includes(filterIng.toLowerCase())
-          )
-        );
-        if (!hasIngredients) return false;
+        const cocktailIngredientNames = cocktail.ingredients.map((ing) => ing.name.toLowerCase());
+        const hasAllIngredients = filters.ingredients.every((filterIng) => {
+          const filterIngLower = filterIng.toLowerCase();
+          return cocktailIngredientNames.some(
+            (ingName) => ingName === filterIngLower || ingName.includes(filterIngLower)
+          );
+        });
+        if (!hasAllIngredients) return false;
       }
 
       return true;
@@ -156,19 +214,11 @@ class CocktailDB {
   }
 
   getCategories(): string[] {
-    const categories = new Set<string>();
-    this.getAllCocktails().forEach((cocktail) => {
-      categories.add(cocktail.category);
-    });
-    return Array.from(categories).sort();
+    return CATEGORIES;
   }
 
   getGlassTypes(): string[] {
-    const glasses = new Set<string>();
-    this.getAllCocktails().forEach((cocktail) => {
-      glasses.add(cocktail.glass);
-    });
-    return Array.from(glasses).sort();
+    return GLASS_TYPES;
   }
 
   getIngredients(): string[] {
@@ -178,7 +228,8 @@ class CocktailDB {
         ingredients.add(ing.name);
       });
     });
-    return Array.from(ingredients).sort();
+    const result = Array.from(ingredients).sort();
+    return result;
   }
 
   clearDatabase(): void {
@@ -187,11 +238,18 @@ class CocktailDB {
     this.isInitialized = false;
   }
 
+  async forceRefreshFromJSON(): Promise<void> {
+    this.cocktails.clear();
+    this.storage.clearAll();
+    this.isInitialized = false;
+    await this.initialize();
+  }
+
   getStats() {
     return {
       totalCocktails: this.cocktails.size,
-      categories: this.getCategories().length,
-      glasses: this.getGlassTypes().length,
+      categories: CATEGORIES.length,
+      glasses: GLASS_TYPES.length,
       ingredients: this.getIngredients().length,
     };
   }

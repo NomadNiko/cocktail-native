@@ -1,7 +1,15 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { View, TextInput, FlatList, RefreshControl } from 'react-native';
+import {
+  View,
+  TextInput,
+  FlatList,
+  RefreshControl,
+  ScrollView,
+  Pressable,
+  TouchableOpacity,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { Icon } from '@roninoss/icons';
+import FontAwesome from '@expo/vector-icons/FontAwesome';
 import { Text } from '~/components/nativewindui/Text';
 import { Button } from '~/components/nativewindui/Button';
 import { Container } from '~/components/Container';
@@ -9,6 +17,7 @@ import { CocktailCard } from '~/components/CocktailCard';
 import { SearchFilters } from '~/components/SearchFilters';
 import { useCocktails } from '~/lib/hooks/useCocktails';
 import { SearchFilters as SearchFiltersType, Cocktail } from '~/lib/types/cocktail';
+// Removed cn import - no longer used
 
 export default function CocktailsScreen() {
   const {
@@ -16,14 +25,17 @@ export default function CocktailsScreen() {
     isLoading,
     error,
     searchCocktails,
-    getAllCocktails,
     getCategories,
     getGlassTypes,
+    getIngredients,
     getStats,
+    forceRefresh,
   } = useCocktails();
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [debouncedQuery, setDebouncedQuery] = useState('');
+  const [titleSearchQuery, setTitleSearchQuery] = useState('');
+  const [debouncedTitleQuery, setDebouncedTitleQuery] = useState('');
+  const [ingredientSearchQuery, setIngredientSearchQuery] = useState('');
+  const [selectedIngredients, setSelectedIngredients] = useState<string[]>([]);
   const [filters, setFilters] = useState<SearchFiltersType>({});
   const [showFilters, setShowFilters] = useState(false);
   const [searchResults, setSearchResults] = useState<Cocktail[]>([]);
@@ -31,50 +43,90 @@ export default function CocktailsScreen() {
   // Get filter options
   const categories = useMemo(() => getCategories(), [getCategories]);
   const glassTypes = useMemo(() => getGlassTypes(), [getGlassTypes]);
+  const allIngredients = useMemo(() => {
+    const ingredients = getIngredients();
+    return ingredients;
+  }, [getIngredients]);
   const stats = useMemo(() => getStats(), [getStats]);
 
-  // Debounce search query
+  // Debounce title search query
   useEffect(() => {
     const timer = setTimeout(() => {
-      setDebouncedQuery(searchQuery);
+      setDebouncedTitleQuery(titleSearchQuery);
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [searchQuery]);
+  }, [titleSearchQuery]);
 
-  // Perform search when debounced query or filters change
-  useEffect(() => {
-    const hasQuery = debouncedQuery.trim().length > 0;
-    const hasFilters = Object.values(filters).some((value) => value !== undefined && value !== '');
-
-    if (hasQuery || hasFilters) {
-      const results = searchCocktails(debouncedQuery, filters);
-      setSearchResults(results);
-    } else {
-      setSearchResults(cocktails);
+  // Handle adding ingredient on Enter key
+  const handleIngredientSubmit = () => {
+    const trimmedQuery = ingredientSearchQuery.trim();
+    if (trimmedQuery && !selectedIngredients.includes(trimmedQuery)) {
+      setSelectedIngredients([...selectedIngredients, trimmedQuery]);
+      setIngredientSearchQuery('');
     }
-  }, [debouncedQuery, filters, cocktails, searchCocktails]);
+  };
+
+  // Perform search when queries, filters, or selected ingredients change
+  useEffect(() => {
+    const hasTitleQuery = debouncedTitleQuery.trim().length > 0;
+    const hasIngredients = selectedIngredients.length > 0;
+    const hasFilters = Object.entries(filters).some(([key, value]) => {
+      return value !== undefined && value !== '';
+    });
+
+    const filtersWithIngredients = {
+      ...filters,
+      ingredients: hasIngredients ? selectedIngredients : undefined,
+    };
+
+    let results: Cocktail[];
+    
+    if (hasTitleQuery || hasIngredients || hasFilters) {
+      results = searchCocktails(debouncedTitleQuery, filtersWithIngredients);
+    } else {
+      results = [...cocktails];
+    }
+    
+    // Always sort to show cocktails with images first
+    const sortedResults = results.sort((a, b) => {
+      // Cocktails with images come first
+      if (a.image && !b.image) return -1;
+      if (!a.image && b.image) return 1;
+      // If both have images or both don't, maintain original order
+      return 0;
+    });
+    
+    setSearchResults(sortedResults);
+  }, [debouncedTitleQuery, selectedIngredients, filters, cocktails, searchCocktails]);
 
   const handleRefresh = () => {
-    getAllCocktails();
+    forceRefresh();
   };
 
   const handleClearSearch = () => {
-    setSearchQuery('');
-    setDebouncedQuery('');
+    setTitleSearchQuery('');
+    setDebouncedTitleQuery('');
+    setIngredientSearchQuery('');
+    setSelectedIngredients([]);
     setFilters({});
     setShowFilters(false);
   };
 
-  const hasActiveFilters = Object.values(filters).some(
-    (value) => value !== undefined && value !== ''
-  );
+
+  const removeIngredient = (ingredient: string) => {
+    setSelectedIngredients(selectedIngredients.filter((ing) => ing !== ingredient));
+  };
+
+  const hasActiveFilters = Object.entries(filters).some(([key, value]) => {
+    return value !== undefined && value !== '';
+  });
 
   const displayedCocktails = searchResults;
 
   if (error) {
     return (
-      <SafeAreaView className="flex-1 bg-background">
+      <SafeAreaView className="flex-1 bg-background" edges={['top', 'left', 'right']}>
         <Container>
           <View className="flex-1 items-center justify-center">
             <Text className="mb-4 text-center text-destructive">{error}</Text>
@@ -87,81 +139,138 @@ export default function CocktailsScreen() {
     );
   }
 
+  // Don't show UI until cocktails are loaded
+  if (isLoading || cocktails.length === 0) {
+    return (
+      <SafeAreaView className="flex-1 bg-background" edges={['top', 'left', 'right']}>
+        <Container>
+          <View className="flex-1 items-center justify-center">
+            <Text className="mb-4 text-lg font-medium text-foreground">Loading cocktails...</Text>
+            <Text className="text-center text-muted-foreground">
+              Please wait while we load the cocktail database
+            </Text>
+          </View>
+        </Container>
+      </SafeAreaView>
+    );
+  }
+
   return (
-    <SafeAreaView className="flex-1 bg-background">
+    <SafeAreaView className="flex-1 bg-background" edges={['top', 'left', 'right']}>
       <Container>
         {/* Header */}
-        <View className="pb-4">
-          <Text className="mb-2 text-2xl font-bold text-foreground">Cocktails</Text>
-          <Text className="text-sm text-muted-foreground">
-            {stats.totalCocktails} recipes • {stats.categories} categories
-          </Text>
+        <View className="pb-4 flex-row items-center justify-between">
+          <View>
+            <Text className="mb-2 text-2xl font-bold text-foreground">Cocktails</Text>
+            <Text className="text-sm text-muted-foreground">
+              Search from {stats.totalCocktails} recipes
+            </Text>
+          </View>
+          <Button
+            variant={hasActiveFilters ? 'primary' : 'secondary'}
+            size="sm"
+            onPress={() => setShowFilters(!showFilters)}
+            className="flex-row items-center">
+            <FontAwesome name="filter" size={16} color="#ffffff" style={{ marginRight: 4 }} />
+            <Text>
+              Filters
+              {hasActiveFilters
+                ? ` (${
+                    Object.entries(filters).filter(([key, value]) => {
+                      return value !== undefined && value !== '';
+                    }).length
+                  })`
+                : ''}
+            </Text>
+          </Button>
         </View>
 
-        {/* Search Bar */}
+        {/* Filters */}
+        {showFilters && (
+          <View className="mb-4">
+            <SearchFilters
+              filters={filters}
+              onFiltersChange={setFilters}
+              categories={categories}
+              glassTypes={glassTypes}
+              isVisible={showFilters}
+              onClose={() => setShowFilters(false)}
+            />
+          </View>
+        )}
+
+        {/* Search Bars */}
         <View className="mb-4">
-          <View className="flex-row items-center rounded-lg border border-border bg-card px-3 py-2">
-            <Icon
-              namingScheme="sfSymbol"
-              name="magnifyingglass"
-              size={20}
-              className="mr-2 text-muted-foreground"
-            />
-            <TextInput
-              placeholder="Search cocktails, ingredients..."
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-              className="flex-1 text-foreground"
-              placeholderTextColor="#9CA3AF"
-            />
-            {(searchQuery || hasActiveFilters) && (
-              <Button variant="plain" size="sm" onPress={handleClearSearch} className="ml-2">
-                <Icon
-                  namingScheme="sfSymbol"
-                  name="xmark"
-                  size={16}
-                  className="text-muted-foreground"
-                />
-              </Button>
-            )}
+          {/* Title Search */}
+          <View className="mb-3">
+            <Text className="mb-1 text-sm font-medium text-muted-foreground">Search by Name</Text>
+            <View className="flex-row items-center rounded-lg border border-border bg-card px-3 py-2">
+              <FontAwesome name="search" size={20} color="#9CA3AF" style={{ marginRight: 8 }} />
+              <TextInput
+                placeholder="Search cocktail names..."
+                value={titleSearchQuery}
+                onChangeText={setTitleSearchQuery}
+                className="flex-1 text-foreground"
+                placeholderTextColor="#9CA3AF"
+              />
+              {titleSearchQuery && (
+                <Button
+                  variant="plain"
+                  size="sm"
+                  onPress={() => setTitleSearchQuery('')}
+                  className="ml-2">
+                  <FontAwesome name="times" size={16} color="#9CA3AF" />
+                </Button>
+              )}
+            </View>
           </View>
 
-          {/* Filter Button */}
-          <View className="mt-3 flex-row items-center justify-between">
-            <Button
-              variant={hasActiveFilters ? 'primary' : 'secondary'}
-              size="sm"
-              onPress={() => setShowFilters(!showFilters)}
-              className="flex-row items-center">
-              <Icon
-                namingScheme="sfSymbol"
-                name="line.3.horizontal.decrease"
-                size={16}
-                className="mr-1"
+          {/* Ingredient Search */}
+          <View>
+            <Text className="mb-1 text-sm font-medium text-muted-foreground">
+              Search by Ingredients
+            </Text>
+            <View className="flex-row items-center rounded-lg border border-border bg-card px-3 py-2">
+              <FontAwesome name="list" size={20} color="#9CA3AF" style={{ marginRight: 8 }} />
+              <TextInput
+                placeholder="Type ingredient and press Enter..."
+                value={ingredientSearchQuery}
+                onChangeText={setIngredientSearchQuery}
+                onSubmitEditing={handleIngredientSubmit}
+                returnKeyType="done"
+                className="flex-1 text-foreground"
+                placeholderTextColor="#9CA3AF"
               />
-              <Text>
-                Filters
-                {hasActiveFilters
-                  ? ` (${Object.values(filters).filter((v) => v !== undefined && v !== '').length})`
-                  : ''}
-              </Text>
-            </Button>
+              {ingredientSearchQuery.trim() && (
+                <Pressable onPress={handleIngredientSubmit} className="ml-2">
+                  <FontAwesome name="plus" size={16} color="#0066CC" />
+                </Pressable>
+              )}
+            </View>
+          </View>
 
-            <Text className="text-sm text-muted-foreground">
+          {/* Selected Ingredients */}
+          {selectedIngredients.length > 0 && (
+            <View className="mt-2 flex-row flex-wrap gap-2">
+              {selectedIngredients.map((ingredient) => (
+                <View
+                  key={ingredient}
+                  className="bg-primary/10 flex-row items-center rounded-full px-3 py-1">
+                  <Text className="mr-1 text-sm text-primary">{ingredient}</Text>
+                  <Pressable onPress={() => removeIngredient(ingredient)}>
+                    <FontAwesome name="times-circle" size={16} color="#0066CC" />
+                  </Pressable>
+                </View>
+              ))}
+            </View>
+          )}
+          {/* Results Count */}
+          <View className="mt-3">
+            <Text className="text-sm text-muted-foreground text-center">
               {displayedCocktails.length} results
             </Text>
           </View>
         </View>
-
-        {/* Filters */}
-        <SearchFilters
-          filters={filters}
-          onFiltersChange={setFilters}
-          categories={categories}
-          glassTypes={glassTypes}
-          isVisible={showFilters}
-          onClose={() => setShowFilters(false)}
-        />
 
         {/* Results */}
         <FlatList
@@ -174,19 +283,14 @@ export default function CocktailsScreen() {
           }}
           ListEmptyComponent={() => (
             <View className="flex-1 items-center justify-center py-20">
-              <Icon
-                namingScheme="sfSymbol"
-                name="magnifyingglass"
-                size={48}
-                className="mb-4 text-muted-foreground"
-              />
+              <FontAwesome name="search" size={48} color="#9CA3AF" style={{ marginBottom: 16 }} />
               <Text className="mb-2 text-lg font-medium text-foreground">
                 {isLoading ? 'Loading cocktails...' : 'No cocktails found'}
               </Text>
               <Text className="text-center text-muted-foreground">
                 {isLoading
                   ? 'Please wait while we load the cocktail database'
-                  : searchQuery || hasActiveFilters
+                  : titleSearchQuery || selectedIngredients.length > 0 || hasActiveFilters
                     ? 'Try adjusting your search or filters'
                     : 'Pull to refresh and load cocktails'}
               </Text>
