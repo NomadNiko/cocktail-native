@@ -1,9 +1,9 @@
 {
   "expo": {
     "name": "Bar Vibez",
-    "slug": "cocktail-native",
+    "slug": "barvibez",
     "version": "1.0.2",
-    "scheme": "cocktail-native",
+    "scheme": "barvibez",
     "web": {
       "bundler": "metro",
       "output": "static",
@@ -31,10 +31,12 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.devnomad.cocktailnative",
+      "bundleIdentifier": "us.nomadsoft.barvibez",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -44,12 +46,12 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.devnomad.cocktailnative"
+      "package": "us.nomadsoft.barvibez"
     },
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "84c9e11f-39da-48fb-8d3c-217137702cca"
+        "projectId": "00d16e31-dd24-4e42-813b-0aaea27afd1f"
       }
     }
   }

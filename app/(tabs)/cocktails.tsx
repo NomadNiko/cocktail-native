@@ -127,14 +127,16 @@ export default function CocktailsScreen() {
   if (error) {
     return (
       <SafeAreaView className="flex-1 bg-background" edges={['top', 'left', 'right']}>
-        <Container>
-          <View className="flex-1 items-center justify-center">
-            <Text className="mb-4 text-center text-destructive">{error}</Text>
-            <Button onPress={handleRefresh}>
-              <Text>Try Again</Text>
-            </Button>
-          </View>
-        </Container>
+        <View style={{ paddingHorizontal: 12, flex: 1 }}>
+          <Container>
+            <View className="flex-1 items-center justify-center">
+              <Text className="mb-4 text-center text-destructive">{error}</Text>
+              <Button onPress={handleRefresh}>
+                <Text>Try Again</Text>
+              </Button>
+            </View>
+          </Container>
+        </View>
       </SafeAreaView>
     );
   }
@@ -143,21 +145,24 @@ export default function CocktailsScreen() {
   if (isLoading || cocktails.length === 0) {
     return (
       <SafeAreaView className="flex-1 bg-background" edges={['top', 'left', 'right']}>
-        <Container>
-          <View className="flex-1 items-center justify-center">
-            <Text className="mb-4 text-lg font-medium text-foreground">Loading cocktails...</Text>
-            <Text className="text-center text-muted-foreground">
-              Please wait while we load the cocktail database
-            </Text>
-          </View>
-        </Container>
+        <View style={{ paddingHorizontal: 12, flex: 1 }}>
+          <Container>
+            <View className="flex-1 items-center justify-center">
+              <Text className="mb-4 text-lg font-medium text-foreground">Loading cocktails...</Text>
+              <Text className="text-center text-muted-foreground">
+                Please wait while we load the cocktail database
+              </Text>
+            </View>
+          </Container>
+        </View>
       </SafeAreaView>
     );
   }
 
   return (
     <SafeAreaView className="flex-1 bg-background" edges={['top', 'left', 'right']}>
-      <Container>
+      <View style={{ paddingHorizontal: 12, flex: 1 }}>
+        <Container>
         {/* Header */}
         <View className="pb-4 flex-row items-center justify-between">
           <View>
@@ -278,6 +283,7 @@ export default function CocktailsScreen() {
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => <CocktailCard cocktail={item} />}
           refreshControl={<RefreshControl refreshing={isLoading} onRefresh={handleRefresh} />}
+          showsVerticalScrollIndicator={false}
           contentContainerStyle={{
             paddingBottom: 20,
           }}
@@ -297,7 +303,8 @@ export default function CocktailsScreen() {
             </View>
           )}
         />
-      </Container>
+        </Container>
+      </View>
     </SafeAreaView>
   );
 }

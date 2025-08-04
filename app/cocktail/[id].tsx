@@ -70,62 +70,69 @@ export default function CocktailDetailScreen() {
 
   if (!cocktail) {
     return (
-      <SafeAreaView className="flex-1 bg-background">
-        <Container>
-          <View className="mb-4 flex-row items-center">
-            <BackButton />
-            <Text className="ml-2 text-lg font-semibold">Cocktail</Text>
-          </View>
+      <SafeAreaView className="flex-1 bg-background" edges={['top', 'left', 'right']}>
+        <View style={{ paddingHorizontal: 12, flex: 1 }}>
+          <Container>
+            <View className="mb-4 flex-row items-center">
+              <BackButton />
+              <Text className="ml-2 text-lg font-semibold">Cocktail</Text>
+            </View>
 
-          <View className="flex-1 items-center justify-center">
-            <FontAwesome
-              name="exclamation-circle"
-              size={48}
-              color="#9CA3AF"
-              style={{ marginBottom: 16 }}
-            />
-            <Text className="mb-2 text-lg font-medium text-foreground">Cocktail not found</Text>
-            <Text className="mb-4 text-center text-muted-foreground">
-              The cocktail you&apos;re looking for doesn&apos;t exist.
-            </Text>
-            <Button onPress={() => router.back()}>
-              <Text>Go Back</Text>
-            </Button>
-          </View>
-        </Container>
+            <View className="flex-1 items-center justify-center">
+              <FontAwesome
+                name="exclamation-circle"
+                size={48}
+                color="#9CA3AF"
+                style={{ marginBottom: 16 }}
+              />
+              <Text className="mb-2 text-lg font-medium text-foreground">Cocktail not found</Text>
+              <Text className="mb-4 text-center text-muted-foreground">
+                The cocktail you&apos;re looking for doesn&apos;t exist.
+              </Text>
+              <Button onPress={() => router.back()}>
+                <Text>Go Back</Text>
+              </Button>
+            </View>
+          </Container>
+        </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-background">
-      <ScrollView>
-        {/* Header */}
-        <View className="px-4 pb-2 pt-4">
-          <View className="mb-4 flex-row items-center">
-            <BackButton />
+    <SafeAreaView className="flex-1 bg-background" edges={['top', 'left', 'right']}>
+      <View style={{ paddingHorizontal: 12, flex: 1 }}>
+        <ScrollView showsVerticalScrollIndicator={false}>
+          {/* Header */}
+          <View className="px-4 pb-2 pt-4">
+            <View className="mb-4 flex-row items-center">
+              <BackButton />
+            </View>
           </View>
-        </View>
 
-        {/* Image */}
-        <View className="mb-6 items-center">
-          <Image
-            source={
-              cocktail.image && getCocktailImage(cocktail.image)
-                ? getCocktailImage(cocktail.image)
-                : getGlassImage(cocktail.glass)
-            }
-            style={{ width: 200, height: 200, borderRadius: 12 }}
-            contentFit="contain"
-            placeholder={getGlassImage(cocktail.glass)}
-            transition={200}
-          />
-        </View>
+          {/* Drink Name */}
+          <View className="mb-6 px-4">
+            <Text className="text-2xl font-bold text-foreground text-center">{cocktail.name}</Text>
+          </View>
 
-        <Container>
-          {/* Title and Info */}
-          <View className="mb-6">
-            <Text className="mb-2 text-2xl font-bold text-foreground">{cocktail.name}</Text>
+          {/* Image */}
+          <View className="mb-6 items-center">
+            <Image
+              source={
+                cocktail.image && getCocktailImage(cocktail.image)
+                  ? getCocktailImage(cocktail.image)
+                  : getGlassImage(cocktail.glass)
+              }
+              style={{ width: 200, height: 200, borderRadius: 12 }}
+              contentFit="contain"
+              placeholder={getGlassImage(cocktail.glass)}
+              transition={200}
+            />
+          </View>
+
+          <Container>
+            {/* Additional Info */}
+            <View className="mb-6">
 
             {cocktail.alternateName && (
               <Text className="mb-3 text-lg text-muted-foreground">{cocktail.alternateName}</Text>
@@ -208,7 +215,8 @@ export default function CocktailDetailScreen() {
 
           <View className="pb-8" />
         </Container>
-      </ScrollView>
+        </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }
